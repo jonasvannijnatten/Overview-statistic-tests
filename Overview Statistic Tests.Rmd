@@ -348,7 +348,7 @@ rm(list=c("control","nrofcondsf1","nrofcondsf2","nrofsubs","score","subj","treat
 ***  
 \newpage  
 
-##  One-way repeated measures ANOVA
+#  One-way repeated measures ANOVA
 <details><summary><span style="color:dodgerBlue">Show code for data generation </span></summary>
 ```{r, echo=TRUE}
 # Generate dataset
@@ -407,7 +407,7 @@ anova(model, X = ~1, test="Spherical")
 
 \newpage
 
-##  Factorial repeated measures ANOVA
+#  Factorial repeated measures ANOVA
 
 <details><summary><span style="color:dodgerBlue">Show code for data generation </span></summary>
 ```{r, echo=TRUE}

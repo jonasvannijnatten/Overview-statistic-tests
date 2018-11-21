@@ -142,10 +142,9 @@ $(document).ready(function () {
 <li><a href="#correlation"><span class="toc-section-number">3</span> Correlation</a></li>
 <li><a href="#regression"><span class="toc-section-number">4</span> Regression</a></li>
 <li><a href="#one-way-independent-samples-anova"><span class="toc-section-number">5</span> One-way independent samples ANOVA</a></li>
-<li><a href="#factorial-independent-samples-anova"><span class="toc-section-number">6</span> Factorial independent samples ANOVA</a><ul>
-<li><a href="#one-way-repeated-measures-anova"><span class="toc-section-number">6.1</span> One-way repeated measures ANOVA</a></li>
-<li><a href="#factorial-repeated-measures-anova"><span class="toc-section-number">6.2</span> Factorial repeated measures ANOVA</a></li>
-</ul></li>
+<li><a href="#factorial-independent-samples-anova"><span class="toc-section-number">6</span> Factorial independent samples ANOVA</a></li>
+<li><a href="#one-way-repeated-measures-anova"><span class="toc-section-number">7</span> One-way repeated measures ANOVA</a></li>
+<li><a href="#factorial-repeated-measures-anova"><span class="toc-section-number">8</span> Factorial repeated measures ANOVA</a></li>
 </ul>
 </div>
 
@@ -212,7 +211,7 @@ score
 A
 </td>
 <td style="text-align:right;">
-27.96868
+28.39810
 </td>
 </tr>
 <tr>
@@ -223,7 +222,7 @@ A
 A
 </td>
 <td style="text-align:right;">
-35.32253
+35.90353
 </td>
 </tr>
 <tr>
@@ -234,7 +233,7 @@ A
 A
 </td>
 <td style="text-align:right;">
-36.94407
+21.07894
 </td>
 </tr>
 <tr>
@@ -245,7 +244,7 @@ A
 A
 </td>
 <td style="text-align:right;">
-19.01169
+18.69258
 </td>
 </tr>
 <tr>
@@ -256,7 +255,7 @@ A
 A
 </td>
 <td style="text-align:right;">
-21.55069
+21.37035
 </td>
 </tr>
 <tr>
@@ -267,7 +266,7 @@ A
 B
 </td>
 <td style="text-align:right;">
-41.07851
+39.25573
 </td>
 </tr>
 <tr>
@@ -278,7 +277,7 @@ B
 B
 </td>
 <td style="text-align:right;">
-32.42466
+35.47844
 </td>
 </tr>
 <tr>
@@ -289,7 +288,7 @@ B
 B
 </td>
 <td style="text-align:right;">
-26.06807
+22.05558
 </td>
 </tr>
 <tr>
@@ -300,7 +299,7 @@ B
 B
 </td>
 <td style="text-align:right;">
-54.50809
+35.13353
 </td>
 </tr>
 <tr>
@@ -311,7 +310,7 @@ B
 B
 </td>
 <td style="text-align:right;">
-41.24990
+41.08096
 </td>
 </tr>
 </tbody>
@@ -323,7 +322,7 @@ B
 ##  Shapiro-Wilk normality test
 ## 
 ## data:  dd[x, ]
-## W = 0.9766, p-value = 0.5652
+## W = 0.93268, p-value = 0.01972
 ## 
 ## -------------------------------------------------------- 
 ## data.long$condition: B
@@ -331,28 +330,26 @@ B
 ##  Shapiro-Wilk normality test
 ## 
 ## data:  dd[x, ]
-## W = 0.98005, p-value = 0.6913</code></pre>
+## W = 0.97654, p-value = 0.5631</code></pre>
 <p>Test for equality of variances</p>
 <pre class="r"><code>leveneTest(y = data.long$score, group = data.long$condition)</code></pre>
 <pre><code>## Levene's Test for Homogeneity of Variance (center = median)
-##       Df F value  Pr(&gt;F)  
-## group  1  3.3225 0.07217 .
-##       78                  
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+##       Df F value Pr(&gt;F)
+## group  1  0.2232 0.6379
+##       78</code></pre>
 <p><strong>T-test</strong></p>
 <pre class="r"><code>t.test(formula = score ~ condition, data = data.long, paired=FALSE, alternative=&quot;two.sided&quot;, var.equal=TRUE)</code></pre>
 <pre><code>## 
 ##  Two Sample t-test
 ## 
 ## data:  score by condition
-## t = -5.6403, df = 78, p-value = 2.613e-07
+## t = -7.4636, df = 78, p-value = 1.022e-10
 ## alternative hypothesis: true difference in means is not equal to 0
 ## 95 percent confidence interval:
-##  -12.003621  -5.740537
+##  -15.095346  -8.737994
 ## sample estimates:
 ## mean in group A mean in group B 
-##        27.97902        36.85110</code></pre>
+##        25.42852        37.34519</code></pre>
 </div>
 <div id="paired-samples-t-test" class="section level2">
 <h2><span class="header-section-number">2.2</span> Paired samples T-test</h2>
@@ -391,7 +388,7 @@ score
 A
 </td>
 <td style="text-align:right;">
-16.95191
+14.91129
 </td>
 </tr>
 <tr>
@@ -402,7 +399,7 @@ A
 A
 </td>
 <td style="text-align:right;">
-23.57814
+27.35957
 </td>
 </tr>
 <tr>
@@ -413,7 +410,7 @@ A
 A
 </td>
 <td style="text-align:right;">
-25.17347
+32.33024
 </td>
 </tr>
 <tr>
@@ -424,7 +421,7 @@ A
 A
 </td>
 <td style="text-align:right;">
-35.78039
+11.96999
 </td>
 </tr>
 <tr>
@@ -435,7 +432,7 @@ A
 A
 </td>
 <td style="text-align:right;">
-19.48606
+11.28343
 </td>
 </tr>
 <tr>
@@ -446,7 +443,7 @@ A
 B
 </td>
 <td style="text-align:right;">
-20.27784
+40.89247
 </td>
 </tr>
 <tr>
@@ -457,7 +454,7 @@ B
 B
 </td>
 <td style="text-align:right;">
-40.06190
+34.79956
 </td>
 </tr>
 <tr>
@@ -468,7 +465,7 @@ B
 B
 </td>
 <td style="text-align:right;">
-38.36894
+33.71314
 </td>
 </tr>
 <tr>
@@ -479,7 +476,7 @@ B
 B
 </td>
 <td style="text-align:right;">
-51.63646
+47.42587
 </td>
 </tr>
 <tr>
@@ -490,7 +487,7 @@ B
 B
 </td>
 <td style="text-align:right;">
-23.37100
+39.65022
 </td>
 </tr>
 </tbody>
@@ -503,20 +500,20 @@ shapiro.test(diffScore)</code></pre>
 ##  Shapiro-Wilk normality test
 ## 
 ## data:  diffScore
-## W = 0.96052, p-value = 0.3194</code></pre>
+## W = 0.98148, p-value = 0.8633</code></pre>
 <p><strong>T-test</strong></p>
 <pre class="r"><code>t.test(formula = score ~ condition, data = data.long, paired=TRUE, alternative=&quot;two.sided&quot;, var.equal=TRUE)</code></pre>
 <pre><code>## 
 ##  Paired t-test
 ## 
 ## data:  score by condition
-## t = -8.5309, df = 29, p-value = 2.13e-09
+## t = -7.0604, df = 29, p-value = 9.118e-08
 ## alternative hypothesis: true difference in means is not equal to 0
 ## 95 percent confidence interval:
-##  -12.813000  -7.857395
+##  -17.017276  -9.372747
 ## sample estimates:
 ## mean of the differences 
-##                -10.3352</code></pre>
+##               -13.19501</code></pre>
 <hr />
 
 </div>
@@ -1152,8 +1149,9 @@ rm(list=c(&quot;control&quot;,&quot;nrofcondsf1&quot;,&quot;nrofcondsf2&quot;,&q
 <p></details></p>
 <hr />
 
-<div id="one-way-repeated-measures-anova" class="section level2">
-<h2><span class="header-section-number">6.1</span> One-way repeated measures ANOVA</h2>
+</div>
+<div id="one-way-repeated-measures-anova" class="section level1">
+<h1><span class="header-section-number">7</span> One-way repeated measures ANOVA</h1>
 <p><details><summary><span style="color:dodgerBlue">Show code for data generation </span></summary></p>
 <pre class="r"><code># Generate dataset
 set.seed(01)   # set seed
@@ -1301,8 +1299,8 @@ C
 <hr />
 
 </div>
-<div id="factorial-repeated-measures-anova" class="section level2">
-<h2><span class="header-section-number">6.2</span> Factorial repeated measures ANOVA</h2>
+<div id="factorial-repeated-measures-anova" class="section level1">
+<h1><span class="header-section-number">8</span> Factorial repeated measures ANOVA</h1>
 <p><details><summary><span style="color:dodgerBlue">Show code for data generation </span></summary></p>
 <pre class="r"><code>set.seed(02)  # set seed
 nrofcondsf1 = 3  # set number of conditions for factor 1
@@ -1503,7 +1501,6 @@ experimental
 </tbody>
 </table>
 <hr />
-</div>
 </div>
 
 
