@@ -7,6 +7,7 @@ output:
     fig_caption: yes
     number_sections: yes
     toc: yes
+    toc_float: true  
     toc_depth: 4
   pdf_document:
     fig_caption: yes
@@ -35,19 +36,22 @@ broncode: https://github.com/jonasvannijnatten/R_Data_Visualization
 ## Versies  
 software versions used for this tutorial:  
  - `r R.Version()$version.string`  
- - car-package version: `r packageVersion("car")` (`r packageDate("car")`)
+ - car-package version: `r packageVersion("car")` (`r packageDate("car")`)  
+ - ez-package version:  `r packageVersion("ez")` (`r packageDate("ez")`)
  
 ##  Installatie
 Benodigde packages downloaden & installeren:
 ```{r, eval = FALSE, echo=TRUE, results='hide', message=FALSE}
 install.packages(pkgs="kableExtra",   repos="https://www.freestatistics.org/cran/")
-install.packages(pkgs="car",   repos="https://www.freestatistics.org/cran/")
+install.packages(pkgs="car",   repos="https://www.freestatistics.org/cran/") 
+install.packages(pkgs="ez",    repos="https://www.freestatistics.org/cran/")
 ```
 
 Benodigde packages activeren:
 ```{r, eval=TRUE, message=FALSE}
 library(package=kableExtra)
 library(package=car)
+library(package=ez)
 ```
 
 ***
@@ -199,6 +203,11 @@ summary(linearModel)
 ***  
 \newpage
 
+# Logistic regression
+
+***  
+\newpage
+
 #  One-way independent samples ANOVA
 <details><summary><span style="color:dodgerBlue">Toon code om voorbeeld data te genereren </span></summary>
 ```{r, echo=TRUE}
@@ -340,10 +349,6 @@ rm(list=c("control","nrofcondsf1","nrofcondsf2","nrofsubs","score","subj","treat
 ```
 </details>   
 
-```{r}
-
-```
-
 
 ***  
 \newpage  
@@ -434,16 +439,63 @@ rm(list=c("control","nrofcondsf1","nrofcondsf2","nrofsubs", "score", "subj", "tr
 ```
 </details>   
 
+<details><summary><span style="color:dodgerBlue">Show code for data generation </span></summary>
+```{r, echo=TRUE}
+set.seed(02)  # set seed
+nrofsubs    = 20 # set number of subjects 
+
+data.wide = data.frame(
+  ID=1:nrofsubs,
+  preA=rnorm(n=nrofsubs, mean = 09,sd = 3),
+  preB=rnorm(n=nrofsubs, mean = 10,sd = 3),
+  preC=rnorm(n=nrofsubs, mean = 11,sd = 3),
+  postA=rnorm(n=nrofsubs, mean = 11,sd = 3),
+  postB=rnorm(n=nrofsubs, mean = 15,sd = 3),
+  postC=rnorm(n=nrofsubs, mean = 20,sd = 3)
+)
+rm(list="nrofsubs")
+```
+</details>   
+
+
 ```{r,echo=FALSE}
-kable(data.long[c(1:2,11:12,21:22,31:32,41:42,52:52),], row.names = FALSE, caption = 'data.long') %>%
+kable(data.long[1:4,], row.names = FALSE, caption = 'data.long') %>%
     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = FALSE, position = "left")
 ```
 
+Fit linear model to the data, not yet seperating both independent factors:
 ```{r}
-
+model = lm(cbind(data.wide$preA,
+                 data.wide$preB,
+                 data.wide$preC,
+                 data.wide$postA,
+                 data.wide$postB,
+                 data.wide$postC
+                 )~1
+           )
 ```
-  
+Make a factor matrix clarifying the conditions. Name the colomns as the factors.
+Use the parts of the column names of the data.frame in the wide format as variable values in the matrix.
+```{r}
+factorMatrix = data.frame(
+  time=as.factor(rep(c("pre","post"),each=3)),
+  condition = as.factor(rep(c("A","B","C"),2))
+)
+```
+fit linear model specifying the two independent variables using the factorMatrix
+```{r}
+library(car)
+factorialAnova = Anova(mod=model, idata=factorMatrix, idesign= ~time*condition, type='III')
+```
+run the factorial ANOVA 
+```{r}
+summary(object = factorialAnova, multivariate=FALSE)
+```
+
+
 ***  
 
+\newpage
 
+# Mixed-Design ANOVA
 
