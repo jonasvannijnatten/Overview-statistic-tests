@@ -1,0 +1,449 @@
+---
+title: "Overview statistic tests PB"
+author: "Jonas van Nijnatten"
+date: "21 november 2018"
+output:
+  html_document:
+    fig_caption: yes
+    number_sections: yes
+    toc: yes
+    toc_depth: 4
+  pdf_document:
+    fig_caption: yes
+    number_sections: yes
+    toc: yes
+    toc_depth: '2'
+header-includes:
+- \usepackage{geometry}
+- \geometry{a4paper, portrait, margin=.75in}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+contact: J.J.vanNijnatten@uva.nl
+
+broncode: https://github.com/jonasvannijnatten/R_Data_Visualization  
+
+***
+
+\newpage
+
+#   Software  
+## Versies  
+software versions used for this tutorial:  
+ - `r R.Version()$version.string`  
+ - car-package version: `r packageVersion("car")` (`r packageDate("car")`)
+ 
+##  Installatie
+Benodigde packages downloaden & installeren:
+```{r, eval = FALSE, echo=TRUE, results='hide', message=FALSE}
+install.packages(pkgs="kableExtra",   repos="https://www.freestatistics.org/cran/")
+install.packages(pkgs="car",   repos="https://www.freestatistics.org/cran/")
+```
+
+Benodigde packages activeren:
+```{r, eval=TRUE, message=FALSE}
+library(package=kableExtra)
+library(package=car)
+```
+
+***
+
+\newpage
+
+#  T-test
+
+## Independent samples T-test
+<details><summary><span style="color:dodgerBlue">Show code for data generation </span></summary>
+```{r}
+# generate data
+N = 40
+data.long = data.frame(
+  ID = 1:N,
+  condition = rep(x = c("A","B"), each = N),
+  score = c(rnorm(n = N, mean = 25, sd = 6.5), rnorm(n = N, mean = 35, sd = 6.5))
+)
+```
+</details>
+
+```{r,echo=FALSE}
+kable(data.long[c(1:5,41:45),], row.names = FALSE, caption = 'data.long') %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = FALSE, position = "left")
+```
+
+Test for assumption of normality
+```{r}
+by(data = data.long$score, INDICES = data.long$condition, FUN = shapiro.test)
+```
+Test for equality of variances
+```{r}
+leveneTest(y = data.long$score, group = data.long$condition)
+```
+**T-test**
+```{r}
+t.test(formula = score ~ condition, data = data.long, paired=FALSE, alternative="two.sided", var.equal=TRUE)
+```
+
+## Paired samples T-test
+<details><summary><span style="color:dodgerBlue">Show code for data generation </span></summary>
+```{r}
+# generate data
+N = 30
+data.long = data.frame(
+  ID = rep(1:N,2),
+  condition = rep(x = c("A","B"), each = N),
+  score = c(rnorm(n = N, mean = 25, sd = 6.5), rnorm(n = N, mean = 35, sd = 6.5))
+)
+```
+</details>
+
+```{r,echo=FALSE}
+kable(data.long[c(1:5,31:35),], row.names = FALSE, caption = 'data.long') %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = FALSE, position = "left")
+```
+
+Test for assumption of normality
+```{r}
+# calculate difference scores
+diffScore = data.long$score[data.long$condition=="A"] - data.long$score[data.long$condition=="B"]
+shapiro.test(diffScore)
+```
+
+**T-test**
+```{r}
+t.test(formula = score ~ condition, data = data.long, paired=TRUE, alternative="two.sided", var.equal=TRUE)
+```
+
+***
+\newpage
+
+#  Correlation
+
+<details><summary><span style="color:dodgerBlue">Show code for data generation </span></summary> 
+```{r}
+# generate data
+set.seed(05)
+nrobs = 100
+experience = rnorm(n = nrobs, mean = 15, sd = 3)
+salary     = 10000 + ( 5 * experience ) + rnorm(n = nrobs, mean = 0, sd = 100)
+data.long = data.frame(experience, salary)
+# calculate correlation coefficient r
+corr_coef = cor(x = data.long$experience, y = data.long$salary)
+rm(list = c("nrobs", "experience", "salary"))
+```
+</details>   
+
+```{r,echo=FALSE}
+kable(data.long[1:5,], row.names = FALSE, caption = 'data.long') %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = FALSE, position = "left")
+```
+Test for assumption of normality
+```{r}
+apply(X = data.long, MARGIN = 2, FUN = shapiro.test)
+```
+
+**Pearson correlation**
+```{r}
+cor.test(x=data.long$experience, y=data.long$salary, alternative = "two.sided", method = "pearson")
+```
+
+**Spearman correlation**
+```{r}
+cor.test(x=data.long$experience, y=data.long$salary, alternative = "two.sided", method = "spearman")
+```
+ ***
+ 
+\newpage 
+
+# Regression
+
+<details><summary><span style="color:dodgerBlue">Show code for data generation </span></summary> 
+```{r}
+# generate data
+set.seed(05)
+nrobs = 100
+experience = rnorm(n = nrobs, mean = 15, sd = 3)
+salary     = 10000 + ( 5 * experience ) + rnorm(n = nrobs, mean = 0, sd = 100)
+data.long = data.frame(experience, salary)
+# calculate correlation coefficient r
+corr_coef = cor(x = data.long$experience, y = data.long$salary)
+rm(list = c("nrobs", "experience", "salary"))
+```
+</details>   
+
+```{r,echo=FALSE}
+kable(data.long[1:5,], row.names = FALSE, caption = 'data.long') %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = FALSE, position = "left")
+```
+
+Fit linear model
+```{r}
+linearModel = lm(formula = salary ~ experience, data = data.long)
+```
+
+Test for assumption of normality & equal variances
+```{r}
+# plot the residuals and look at the distribution around the 0-line and if the spread is equal over all x's.
+plot(x=linearModel$fitted.values, y=linearModel$residuals, xlab = "predicted", ylab = "residuals"); abline(h=0)
+shapiro.test(linearModel$residuals)
+```
+**Regression test**
+```{r}
+summary(linearModel)
+```
+
+
+***  
+\newpage
+
+#  One-way independent samples ANOVA
+<details><summary><span style="color:dodgerBlue">Toon code om voorbeeld data te genereren </span></summary>
+```{r, echo=TRUE}
+set.seed(05)   # set seed
+nrofconds = 3  # set number of conditions
+nrofsubs  = 20 # set number of subjects
+subj = as.factor(1:(nrofsubs*nrofconds))      # create array with subject IDs
+condition = as.factor(rep(LETTERS[1:nrofconds],each=nrofsubs))   # create array with condition values
+score = as.vector( replicate(
+          nrofconds , rnorm(n = nrofsubs, mean = sample(8,1)+10 , sd = sample(5,1) ) 
+        ) )                                     # create array with measurement values
+data.long = data.frame(subj, condition, score);      # combine arrays into a data.frame
+rm(list=c("subj", "condition","score","nrofconds","nrofsubs")) # delete unnecessary variables
+
+```   
+</details>  
+   
+```{r,echo=FALSE}
+kable(data.long[c(1:2,21:22,41:42),], row.names = FALSE, caption = 'data.long') %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = FALSE, position = "left")
+```
+
+Test for assumption of normality
+```{r}
+by(data = data.long$score, INDICES = data.long$condition, FUN = shapiro.test)
+```
+Test for equality of variances
+```{r}
+leveneTest(y = data.long$score, group = data.long$condition)
+```
+**ANOVA*** with the aov method
+```{r}
+myModel = aov(formula = score ~ condition, data = data.long)
+summary(myModel)
+```
+**ANOVA*** with the linear model method
+```{r}
+myModel = lm(formula = score ~ condition, data = data.long)
+summary(myModel)
+```
+
+***  
+\newpage
+
+#  Factorial independent samples ANOVA
+
+<details><summary><span style="color:dodgerBlue">Show code for data generation</span></summary>
+```{r, echo=TRUE}
+set.seed(01)   # set seed
+nrofcondsf1 = 3  # set number of conditions for factor 1
+nrofcondsf2 = 2  # set number of conditions for factor 2
+nrofsubs    = nrofcondsf1*nrofcondsf2*30 # set number of subjects per condition
+subj = as.factor(1:(nrofsubs))      # create array with subject IDs
+# create array witht treatment conditions
+treatment = as.factor(rep(LETTERS[1:nrofcondsf1],each=nrofsubs/nrofcondsf1))   
+# create array with control / experimental
+control   = as.factor(rep(c("control","experimental"),times=nrofsubs/nrofcondsf2))   
+# create array with measurement values
+score = as.vector( replicate(nrofcondsf1, replicate ( 
+          nrofcondsf2 , rnorm(
+            n = (nrofsubs/(nrofcondsf1*nrofcondsf2)), 
+            mean = 0 , sd = sample(5,1) ) + sample(8,1)+10
+        ) ) )                             
+# combine arrays into a data.frame
+data.long = data.frame(subj, score, treatment, control);      
+# delete unnecessary arrays
+rm(list=c("control","nrofcondsf1","nrofcondsf2","nrofsubs","score","subj","treatment"))
+
+```   
+</details>     
+
+```{r,echo=FALSE}
+kable(data.long[c(1:2,61:62,121:122),], row.names = FALSE, caption = 'data.long') %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = FALSE, position = "left")
+```
+
+Fit model with multiple prediction factors
+```{r}
+model = lm(formula = score ~ treatment+control, data = data.long)
+```
+
+Test for assumption of normality
+```{r, eval=FALSE}
+hist(model$residuals)
+plot(x = fitted(model), y = residuals(model), xlab="predicted", ylab="residuals"); abline(h=0)
+by(data = data.long$score, INDICES = paste(data.long$treatment, data.long$control), FUN = shapiro.test)
+```
+<details><summary><span style="color:dodgerBlue">Show residuals histogram</span></summary>
+```{r, echo=FALSE}
+hist(model$residuals)
+```
+</details>
+<details><summary><span style="color:dodgerBlue">Show residuals vs predicted plot</span></summary>
+```{r, echo=FALSE}
+plot(x = fitted(model), y = residuals(model), xlab="predicted", ylab="residuals"); abline(h=0)
+```
+</details>
+<details><summary><span style="color:dodgerBlue">Show output of Shapiro-Wilk test</span></summary>
+```{r, echo=FALSE}
+by(data = data.long$score, INDICES = paste(data.long$treatment, data.long$control), FUN = shapiro.test)
+```
+</details>
+
+Test for equality of variances
+```{r}
+leveneTest(y = data.long$score, group = as.factor(paste(data.long$treatment, data.long$control)))
+```
+
+**ANOVA** with the linear model method
+```{r}
+model = lm(formula = score ~ treatment+control, data = data.long)
+library(car)
+Anova(mod = model, type = 'II')
+summary(model)
+```
+\newpage 
+
+<details><summary><span style="color:dodgerBlue">Show code for data generation </span></summary>
+```{r, echo=TRUE}
+set.seed(01)   # set seed
+nrofcondsf1 = 3  # set number of conditions for factor 1
+nrofcondsf2 = 2  # set number of conditions for factor 2
+nrofsubs    = nrofcondsf1*nrofcondsf2*20 # set number of subjects per condition
+subj = as.factor(1:(nrofsubs))      # create array with subject IDs
+# create array witht treatment conditions
+treatment = as.factor(rep(LETTERS[1:nrofcondsf1],each=nrofsubs/nrofcondsf1))   
+# create array with control / experimental
+control   = as.factor(rep(c("control","experimental"),times=nrofsubs/nrofcondsf2))   
+# create array with measurement values
+score = as.vector( replicate(nrofcondsf1, replicate ( 
+          nrofcondsf2 , rchisq(
+            n = (nrofsubs/(nrofcondsf1*nrofcondsf2)), 
+            df = 3)  
+        )+  sample(14,1)+10  ) )                             
+# combine arrays into a data.frame
+data.long = data.frame(subj, score, treatment, control);      
+# delete unnecessary arrays
+rm(list=c("control","nrofcondsf1","nrofcondsf2","nrofsubs","score","subj","treatment"))
+```
+</details>   
+
+```{r}
+
+```
+
+
+***  
+\newpage  
+
+##  One-way repeated measures ANOVA
+<details><summary><span style="color:dodgerBlue">Show code for data generation </span></summary>
+```{r, echo=TRUE}
+# Generate dataset
+set.seed(01)   # set seed
+nrofsubs  = 20 # set number of subjects
+nrofconds = 3  # set number of conditions
+subj = as.factor(rep(1:nrofsubs,nrofconds))      # create array with subject IDs
+cond = as.factor(rep(LETTERS[1:nrofconds],each=nrofsubs))   # create array with condition values
+score = as.vector( replicate(
+          nrofconds , rnorm(n = nrofsubs, mean = sample(8,1)+10 , sd = sample(5,1) ) 
+        ) )                                     # create array with measurement values
+data.long = data.frame(subj, cond, score);      # combine arrays into a data.frame
+rm(list=c("cond","nrofconds","nrofsubs","score","subj")) # delete arrays
+```
+
+```{r, echo=TRUE}
+# Generate dataset
+set.seed(01)   # set seed
+nrofsubs  = 20 # set number of subjects
+data.wide = data.frame(
+  subj = as.factor(1:nrofsubs)   ,
+  A =  rnorm(n = nrofsubs, mean = sample(8,1)+10 , sd = sample(5,1)) ,
+  B =  rnorm(n = nrofsubs, mean = sample(8,1)+10 , sd = sample(5,1)) ,
+  C =  rnorm(n = nrofsubs, mean = sample(8,1)+10 , sd = sample(5,1))
+)
+rm(list=c("nrofsubs")) # delete arrays
+```
+
+</details>  
+
+```{r,echo=FALSE}
+kable(data.long[c(1:2,21:22,41:42),], row.names = FALSE, caption = 'data.long') %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = FALSE, position = "left")
+```
+
+fit linear model
+```{r}
+model = lm(formula = cbind(data.wide$A, data.wide$B, data.wide$C)~1)
+```  
+Test for assumption of normality
+```{r}
+hist(model$residuals)
+shapiro.test(model$residuals)
+```
+Test for assumption of sphericity
+```{r}
+mauchly.test(model, X=~1)
+```
+ANOVA
+```{r}
+anova(model, X = ~1, test="Spherical")
+```
+
+
+***  
+
+\newpage
+
+##  Factorial repeated measures ANOVA
+
+<details><summary><span style="color:dodgerBlue">Show code for data generation </span></summary>
+```{r, echo=TRUE}
+set.seed(02)  # set seed
+nrofcondsf1 = 3  # set number of conditions for factor 1
+nrofcondsf2 = 2  # set number of conditions for factor 2
+nrofsubs    = 10 # set number of subjects 
+# create array with subject IDs
+subj = as.factor(rep(1:(nrofsubs),times=nrofcondsf1*nrofcondsf2))    
+# create array witht treatment conditions
+treatment = as.factor(rep(LETTERS[1:nrofcondsf1],each=nrofsubs*nrofcondsf2))   
+# create array with control / experimental
+control   = as.factor(
+  rep(rep(c("control","experimental"),each=nrofsubs),times=nrofcondsf1))  
+# create array with measurement values
+score = as.vector( replicate(nrofcondsf1,        
+                   replicate(nrofcondsf2,    
+                   rnorm(n = (nrofsubs), mean = sample(14,1)+10 , sd = sample(5,1)        
+                                   ) ) ) )                  
+# combine arrays into a data.frame
+data.long = data.frame(subj, score, treatment, control);      
+# delete arrays
+rm(list=c("control","nrofcondsf1","nrofcondsf2","nrofsubs", "score", "subj", "treatment"))
+```
+</details>   
+
+```{r,echo=FALSE}
+kable(data.long[c(1:2,11:12,21:22,31:32,41:42,52:52),], row.names = FALSE, caption = 'data.long') %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = FALSE, position = "left")
+```
+
+```{r}
+
+```
+  
+***  
+
+
+
