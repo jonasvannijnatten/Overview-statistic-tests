@@ -32,22 +32,22 @@ source code: https://github.com/jonasvannijnatten/R_Data_Visualization
 
 \newpage
 
-#   Software  
-## Versies  
+#   R and package versions
+## Versions  
 software versions used for this tutorial:  
- - `r R.Version()$version.string`  
+ - `r R.Version()$version.string`   
  - car-package version: `r packageVersion("car")` (`r packageDate("car")`)  
  - ez-package version:  `r packageVersion("ez")` (`r packageDate("ez")`)
  
-##  Installatie
-Benodigde packages downloaden & installeren:
+##  Installation
+Download & install the required packages:
 ```{r, eval = FALSE, echo=TRUE, results='hide', message=FALSE}
 install.packages(pkgs="kableExtra",   repos="https://www.freestatistics.org/cran/")
 install.packages(pkgs="car",   repos="https://www.freestatistics.org/cran/") 
 install.packages(pkgs="ez",    repos="https://www.freestatistics.org/cran/")
 ```
 
-Benodigde packages activeren:
+Activate required packages:
 ```{r, eval=TRUE, message=FALSE}
 library(package=kableExtra)
 library(package=car)
@@ -205,7 +205,7 @@ summary(linearModel)
 
 # Logistic regression
 
-generate dataset
+<details><summary><span style="color:dodgerBlue">Show code for data generation </span></summary> 
 ```{r}
 set.seed(01)
 N = 30
@@ -216,6 +216,7 @@ data.long = data.frame(
              ) # round it to either 1 or 0
   )
 ```
+</details>
 
 ```{r}
 # fit a logistic model, which is a generalized linear model, hence glm() function
@@ -253,6 +254,7 @@ kable(data.long[c(1:2,21:22,41:42),], row.names = FALSE, caption = 'data.long') 
     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = FALSE, position = "left")
 ```
 
+## Checking assumptions
 
 Test assumption of normality
 ```{r}
@@ -263,16 +265,32 @@ Test equality of variances
 leveneTest(y = data.long$score, group = data.long$condition)
 ```
 
+## Running the test
+
 **ANOVA*** with the aov method
 ```{r}
-myModel = aov(formula = score ~ condition, data = data.long)
-summary(myModel)
+aovModel = aov(formula = score ~ condition, data = data.long)
+summary(aovModel)
 ```
 **ANOVA*** with the linear model method
 ```{r}
-myModel = lm(formula = score ~ condition, data = data.long)
-summary(myModel)
+lmModel = lm(formula = score ~ condition, data = data.long)
+summary(lmModel)
 ```
+
+## Post-hoc analysis
+
+When using the aov method, use the Tukey post-hoc test
+```{r}
+TukeyHSD(aovModel)
+```
+
+When using the linear model method, use pairwise t-test
+```{r}
+pairwise.t.test(x = data.long$score, g = data.long$condition, paired = FALSE, p.adjust.method = "bonferroni")
+```
+
+
 
 ***  
 \newpage
@@ -309,10 +327,14 @@ kable(data.long[c(1:2,61:62,121:122),], row.names = FALSE, caption = 'data.long'
     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = FALSE, position = "left")
 ```
 
+## Fitting the model
+
 Fit model with multiple prediction factors
 ```{r}
 model = lm(formula = score ~ treatment+control, data = data.long)
 ```
+
+## Checking assumptions
 
 Test assumption of normality
 ```{r, eval=FALSE}
@@ -341,38 +363,53 @@ Test equality of variances
 leveneTest(y = data.long$score, group = as.factor(paste(data.long$treatment, data.long$control)))
 ```
 
-**ANOVA** with the linear model method
+## Running the test
+
+ANOVA with the linear model method
 ```{r}
-model = lm(formula = score ~ treatment+control, data = data.long)
+model = lm(formula = score ~ treatment*control, data = data.long)
 library(car)
 Anova(mod = model, type = 'II')
 summary(model)
 ```
 \newpage 
 
-<details><summary><span style="color:dodgerBlue">Show code for data generation </span></summary>
-```{r, echo=TRUE}
-set.seed(01)   # set seed
-nrofcondsf1 = 3  # set number of conditions for factor 1
-nrofcondsf2 = 2  # set number of conditions for factor 2
-nrofsubs    = nrofcondsf1*nrofcondsf2*20 # set number of subjects per condition
-subj = as.factor(1:(nrofsubs))      # create array with subject IDs
-# create array witht treatment conditions
-treatment = as.factor(rep(LETTERS[1:nrofcondsf1],each=nrofsubs/nrofcondsf1))   
-# create array with control / experimental
-control   = as.factor(rep(c("control","experimental"),times=nrofsubs/nrofcondsf2))   
-# create array with measurement values
-score = as.vector( replicate(nrofcondsf1, replicate ( 
-          nrofcondsf2 , rchisq(
-            n = (nrofsubs/(nrofcondsf1*nrofcondsf2)), 
-            df = 3)  
-        )+  sample(14,1)+10  ) )                             
-# combine arrays into a data.frame
-data.long = data.frame(subj, score, treatment, control);      
-# delete unnecessary arrays
-rm(list=c("control","nrofcondsf1","nrofcondsf2","nrofsubs","score","subj","treatment"))
+## Post-hoc analysis
+
+When there are one or more significant main-effects but no significant interaction effect post-hoc comparisons can be made for each factor separately using the pairwise.t.test() function.
+
+Post-hoc comparison for the first factor:
+```{r}
+pairwise.t.test(
+  x = data.long$score               # column name of the dependent variable
+  ,g = data.long$treatment          # column name of the first within-subjects variable
+  , paired = FALSE                   # since it is a paired design, set paired=TRUE
+  , p.adjust.method = "bonferroni"  # use bonferroni corrected p-values
+  )
 ```
-</details>   
+
+Post-hoc comparison for the first factor:
+```{r}
+pairwise.t.test(
+  x = data.long$score               # column name of the dependent variable
+  ,g = data.long$control           # column name of the second within-subjects variable
+  , paired = FALSE                   # since it is a paired design, set paired=TRUE
+  , p.adjust.method = "bonferroni"  # use bonferroni corrected p-values
+  )
+```
+
+When the interaction effect turns out significant, pairwise comparisons can be made between all combinations of conditions.
+
+Post-hoc comparison for the interaction effect:
+```{r}
+pairwise.t.test(
+  x = data.long$score               # column name of the dependent variable
+  # merge both factor columns into a combined factor
+  ,g = paste(data.long$treatment, data.long$control)           
+  , paired = FALSE                   # since it is a paired design, set paired=TRUE
+  , p.adjust.method = "bonferroni"  # use bonferroni corrected p-values
+  )
+```
 
 
 ***  
@@ -399,24 +436,63 @@ kable(data.wide[1:4,], row.names = FALSE, caption = 'data.wide') %>%
     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = FALSE, position = "left")
 ```
 
+## Fitting the model
+
 fit linear model
 ```{r}
 model = lm(formula = cbind(data.wide$A, data.wide$B, data.wide$C)~1)
 ```  
+
+## Checking assumptions
+
 Test assumption of normality
-```{r}
-hist(model$residuals)
+```{r, results='hide', eval=FALSE}
 shapiro.test(model$residuals)
+hist(model$residuals)
 ```
+
+```{r, echo=FALSE}
+shapiro.test(model$residuals)
+hist(model$residuals)
+```
+
 Test assumption of sphericity
 ```{r}
 mauchly.test(model, X=~1)
 ```
-ANOVA
+
+## Running the test
+
+Test the model using ANOVA
 ```{r}
 anova(model, X = ~1, test="Spherical")
 ```
 
+## Post-hoc analysis
+For post-hoc analysis the data has to be transformed to the **long format**
+<details><summary><span style="color:dodgerBlue">Show code for reshaping </span></summary>
+```{r, results='hide'}
+# reshape into wide format
+data.long = reshape(data = data.wide
+                   , direction = 'long'
+                   , varying = c("A","B","C")
+                   , timevar = 'treatment'
+                   , times = c("A","B","C")
+                   , v.names = c("score")
+                   , idvar = "subj"
+                   )
+```
+</details>
+
+Use pairwise T-test to compare each combination of conditions
+```{r}
+pairwise.t.test(
+  x = data.long$score               # column name of the dependent variable
+  ,g = data.long$treatment          # column name of the first within-subjects variable
+  , paired = TRUE                   # since it is a paired design, set paired=TRUE
+  , p.adjust.method = "bonferroni"  # use bonferroni corrected p-values
+  )
+```
 
 ***  
 
@@ -448,6 +524,8 @@ kable(data.wide[1:4,], row.names = FALSE, caption = 'data.wide') %>%
     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = FALSE, position = "left")
 ```
 
+## Fitting the model
+
 Fit linear model to the data, not yet seperating both independent factors:
 ```{r}
 model = lm(cbind(data.wide$preA,
@@ -472,10 +550,29 @@ fit linear model specifying the two independent variables using the factorMatrix
 library(car)
 factorialAnova = Anova(mod=model, idata=factorMatrix, idesign= ~time*condition, type='III')
 ```
+
+## Checking assumptions
+```{r, eval=FALSE  , results='hide'}
+shapiro.test(model$residuals)
+hist(model$residuals)
+```
+
+```{r, echo=FALSE}
+shapiro.test(model$residuals)
+hist(model$residuals)
+```
+
+
+## Running the test
 run the factorial ANOVA 
 ```{r}
 summary(object = factorialAnova, multivariate=FALSE)
 ```
+
+The Mauchly Test checks each factor on the assumption of sphericity.
+If the Mauchly Test shows a significant result for any of the factors or interaction between factors then a corrected p=value should be used instead of the normal, uncorrected p-value. 
+
+## Post-hoc analysis
 
 For post-hoc analysis the data has to be transformed to the **long format**
 <details><summary><span style="color:dodgerBlue">Show code for reshaping </span></summary>
@@ -571,6 +668,8 @@ kable(data.long[c(1:2,61:62,121:122),], row.names = FALSE, caption = 'data.long'
     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = FALSE, position = "left")
 ```
 
+## Fitting the model
+
 Fit mixed-model using ezANOVA() function
 ```{r}
 mix.model = ezANOVA(data = data.long      # name of the data frame (long format)
@@ -581,6 +680,8 @@ mix.model = ezANOVA(data = data.long      # name of the data frame (long format)
                     , return_aov = TRUE   # add information to the output for normality testing
                     )
 ```
+
+## Checking assumptions
 
 Test assumption of normality of the residuals
 ```{r, echo=TRUE, eval=FALSE, results='hide'}
@@ -600,6 +701,7 @@ Test assumption of sphericity
 mix.model$`Mauchly's Test for Sphericity`
 ```
 
+## Running the test
 If the assumption of sphericity is met use the normal, uncorrected ANOVA output
 ```{r}
 mix.model$ANOVA
@@ -610,6 +712,8 @@ If the assumption of sphericity is violated, use the corrected ANOVA output
 ```{r}
 mix.model$`Sphericity Corrections`
 ```
+
+## Post-hoc analysis
 
 When there are one or more significant main-effects but no significant interaction effect post-hoc comparisons can be made using the pairwise.t.test() function.
 
