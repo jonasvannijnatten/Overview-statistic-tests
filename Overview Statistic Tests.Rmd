@@ -1,5 +1,5 @@
 ---
-title: "Overview statistic tests PB"
+title: "Overview statistic tests PB"  
 author: "Jonas van Nijnatten"
 date: "21 november 2018"
 output:
@@ -26,7 +26,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 contact: J.J.vanNijnatten@uva.nl
 
-broncode: https://github.com/jonasvannijnatten/R_Data_Visualization  
+source code: https://github.com/jonasvannijnatten/R_Data_Visualization  
 
 ***
 
@@ -78,11 +78,11 @@ kable(data.long[c(1:5,41:45),], row.names = FALSE, caption = 'data.long') %>%
     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = FALSE, position = "left")
 ```
 
-Test for assumption of normality
+Test assumption of normality
 ```{r}
 by(data = data.long$score, INDICES = data.long$condition, FUN = shapiro.test)
 ```
-Test for equality of variances
+Test assumption of equality of variances
 ```{r}
 leveneTest(y = data.long$score, group = data.long$condition)
 ```
@@ -109,7 +109,7 @@ kable(data.long[c(1:5,31:35),], row.names = FALSE, caption = 'data.long') %>%
     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = FALSE, position = "left")
 ```
 
-Test for assumption of normality
+Test assumption of normality
 ```{r}
 # calculate difference scores
 diffScore = data.long$score[data.long$condition=="A"] - data.long$score[data.long$condition=="B"]
@@ -144,7 +144,7 @@ rm(list = c("nrobs", "experience", "salary"))
 kable(data.long[1:5,], row.names = FALSE, caption = 'data.long') %>%
     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = FALSE, position = "left")
 ```
-Test for assumption of normality
+Test assumption of normality
 ```{r}
 apply(X = data.long, MARGIN = 2, FUN = shapiro.test)
 ```
@@ -188,7 +188,7 @@ Fit linear model
 linearModel = lm(formula = salary ~ experience, data = data.long)
 ```
 
-Test for assumption of normality & equal variances
+Test assumption of normality & equal variances
 ```{r}
 # plot the residuals and look at the distribution around the 0-line and if the spread is equal over all x's.
 plot(x=linearModel$fitted.values, y=linearModel$residuals, xlab = "predicted", ylab = "residuals"); abline(h=0)
@@ -204,6 +204,29 @@ summary(linearModel)
 \newpage
 
 # Logistic regression
+
+generate dataset
+```{r}
+set.seed(01)
+N = 30
+data.long = data.frame(
+  x = 1:N,
+  y = round( 1 / (1 + exp(-.23*(1:N-10)))  +  # logistic function of x
+               rnorm(n = N, mean = 0, sd = .3) # add some noise
+             ) # round it to either 1 or 0
+  )
+```
+
+```{r}
+# fit a logistic model, which is a generalized linear model, hence glm() function
+glm.fit <- glm(y ~ x, data = data.long, family = binomial('logit'))
+# test the logistic model against the NULL model
+anova(glm.fit, test="Chisq")
+```
+```{r}
+plot(data.long$x, data.long$y) # plot the measured data
+lines(formula = glm.fit$fitted.values ~ data.long$x) # plot the fitted model
+```
 
 ***  
 \newpage
@@ -230,14 +253,16 @@ kable(data.long[c(1:2,21:22,41:42),], row.names = FALSE, caption = 'data.long') 
     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = FALSE, position = "left")
 ```
 
-Test for assumption of normality
+
+Test assumption of normality
 ```{r}
 by(data = data.long$score, INDICES = data.long$condition, FUN = shapiro.test)
 ```
-Test for equality of variances
+Test equality of variances
 ```{r}
 leveneTest(y = data.long$score, group = data.long$condition)
 ```
+
 **ANOVA*** with the aov method
 ```{r}
 myModel = aov(formula = score ~ condition, data = data.long)
@@ -289,7 +314,7 @@ Fit model with multiple prediction factors
 model = lm(formula = score ~ treatment+control, data = data.long)
 ```
 
-Test for assumption of normality
+Test assumption of normality
 ```{r, eval=FALSE}
 hist(model$residuals)
 plot(x = fitted(model), y = residuals(model), xlab="predicted", ylab="residuals"); abline(h=0)
@@ -311,7 +336,7 @@ by(data = data.long$score, INDICES = paste(data.long$treatment, data.long$contro
 ```
 </details>
 
-Test for equality of variances
+Test equality of variances
 ```{r}
 leveneTest(y = data.long$score, group = as.factor(paste(data.long$treatment, data.long$control)))
 ```
@@ -359,20 +384,6 @@ rm(list=c("control","nrofcondsf1","nrofcondsf2","nrofsubs","score","subj","treat
 # Generate dataset
 set.seed(01)   # set seed
 nrofsubs  = 20 # set number of subjects
-nrofconds = 3  # set number of conditions
-subj = as.factor(rep(1:nrofsubs,nrofconds))      # create array with subject IDs
-cond = as.factor(rep(LETTERS[1:nrofconds],each=nrofsubs))   # create array with condition values
-score = as.vector( replicate(
-          nrofconds , rnorm(n = nrofsubs, mean = sample(8,1)+10 , sd = sample(5,1) ) 
-        ) )                                     # create array with measurement values
-data.long = data.frame(subj, cond, score);      # combine arrays into a data.frame
-rm(list=c("cond","nrofconds","nrofsubs","score","subj")) # delete arrays
-```
-
-```{r, echo=TRUE}
-# Generate dataset
-set.seed(01)   # set seed
-nrofsubs  = 20 # set number of subjects
 data.wide = data.frame(
   subj = as.factor(1:nrofsubs)   ,
   A =  rnorm(n = nrofsubs, mean = sample(8,1)+10 , sd = sample(5,1)) ,
@@ -381,11 +392,10 @@ data.wide = data.frame(
 )
 rm(list=c("nrofsubs")) # delete arrays
 ```
-
 </details>  
 
 ```{r,echo=FALSE}
-kable(data.long[c(1:2,21:22,41:42),], row.names = FALSE, caption = 'data.long') %>%
+kable(data.wide[1:4,], row.names = FALSE, caption = 'data.wide') %>%
     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = FALSE, position = "left")
 ```
 
@@ -393,12 +403,12 @@ fit linear model
 ```{r}
 model = lm(formula = cbind(data.wide$A, data.wide$B, data.wide$C)~1)
 ```  
-Test for assumption of normality
+Test assumption of normality
 ```{r}
 hist(model$residuals)
 shapiro.test(model$residuals)
 ```
-Test for assumption of sphericity
+Test assumption of sphericity
 ```{r}
 mauchly.test(model, X=~1)
 ```
@@ -413,31 +423,6 @@ anova(model, X = ~1, test="Spherical")
 \newpage
 
 #  Factorial repeated measures ANOVA
-
-<details><summary><span style="color:dodgerBlue">Show code for data generation </span></summary>
-```{r, echo=TRUE}
-set.seed(02)  # set seed
-nrofcondsf1 = 3  # set number of conditions for factor 1
-nrofcondsf2 = 2  # set number of conditions for factor 2
-nrofsubs    = 10 # set number of subjects 
-# create array with subject IDs
-subj = as.factor(rep(1:(nrofsubs),times=nrofcondsf1*nrofcondsf2))    
-# create array witht treatment conditions
-treatment = as.factor(rep(LETTERS[1:nrofcondsf1],each=nrofsubs*nrofcondsf2))   
-# create array with control / experimental
-control   = as.factor(
-  rep(rep(c("control","experimental"),each=nrofsubs),times=nrofcondsf1))  
-# create array with measurement values
-score = as.vector( replicate(nrofcondsf1,        
-                   replicate(nrofcondsf2,    
-                   rnorm(n = (nrofsubs), mean = sample(14,1)+10 , sd = sample(5,1)        
-                                   ) ) ) )                  
-# combine arrays into a data.frame
-data.long = data.frame(subj, score, treatment, control);      
-# delete arrays
-rm(list=c("control","nrofcondsf1","nrofcondsf2","nrofsubs", "score", "subj", "treatment"))
-```
-</details>   
 
 <details><summary><span style="color:dodgerBlue">Show code for data generation </span></summary>
 ```{r, echo=TRUE}
@@ -459,7 +444,7 @@ rm(list="nrofsubs")
 
 
 ```{r,echo=FALSE}
-kable(data.long[1:4,], row.names = FALSE, caption = 'data.long') %>%
+kable(data.wide[1:4,], row.names = FALSE, caption = 'data.wide') %>%
     kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = FALSE, position = "left")
 ```
 
@@ -492,10 +477,161 @@ run the factorial ANOVA
 summary(object = factorialAnova, multivariate=FALSE)
 ```
 
+For post-hoc analysis the data has to be transformed to the **long format**
+<details><summary><span style="color:dodgerBlue">Show code for reshaping </span></summary>
+```{r, results='hide'}
+# reshape into wide format
+data.mix = reshape(data = data.wide
+                   , direction = 'long'
+                   , varying = list(c('preA','preB','preC'),c('postA','postB','postC'))
+                   , timevar = 'treatment'
+                   , times = c("A","B","C")
+                   , v.names = c("pre","post")
+                   , idvar = "ID"
+                   )
+data.long = reshape(data = data.mix
+                   , direction = 'long'
+                   , varying = c("pre","post")
+                   , timevar = 'pre_post'
+                   , times = c("pre","post")
+                   , v.names = "score"
+                   , idvar = c("ID", "treatment")
+                   )
+```
+</details>
+
+When there are one or more significant main-effects but no significant interaction effect post-hoc comparisons can be made for each factor separately using the pairwise.t.test() function.
+
+Post-hoc comparison for the first factor:
+```{r}
+pairwise.t.test(
+  x = data.long$score               # column name of the dependent variable
+  ,g = data.long$treatment          # column name of the first within-subjects variable
+  , paired = TRUE                   # since it is a paired design, set paired=TRUE
+  , p.adjust.method = "bonferroni"  # use bonferroni corrected p-values
+  )
+```
+
+Post-hoc comparison for the first factor:
+```{r}
+pairwise.t.test(
+  x = data.long$score               # column name of the dependent variable
+  ,g = data.long$pre_post           # column name of the second within-subjects variable
+  , paired = TRUE                   # since it is a paired design, set paired=TRUE
+  , p.adjust.method = "bonferroni"  # use bonferroni corrected p-values
+  )
+```
+
+When the interaction effect turns out significant, pairwise comparisons can be made between all combinations of conditions.
+
+Post-hoc comparison for the interaction effect:
+```{r}
+pairwise.t.test(
+  x = data.long$score               # column name of the dependent variable
+  # merge both factor columns into a combined factor
+  ,g = paste(data.long$treatment, data.long$pre_post)           
+  , paired = TRUE                   # since it is a paired design, set paired=TRUE
+  , p.adjust.method = "bonferroni"  # use bonferroni corrected p-values
+  )
+```
 
 ***  
 
 \newpage
 
 # Mixed-Design ANOVA
+
+<details><summary><span style="color:dodgerBlue">Show code for data generation</span></summary>
+```{r, echo=TRUE}
+set.seed(02)   # set seed
+nrofcondsf1 = 3  # set number of conditions for factor 1
+nrofcondsf2 = 2  # set number of conditions for factor 2
+nrofsubs    = 30 # set number of subjects per condition
+subj = as.factor(rep(x= 1:(nrofsubs*nrofcondsf2), times=nrofcondsf1))       # create array with subject IDs
+# create array witht treatment conditions
+treatment = as.factor(rep(LETTERS[1:nrofcondsf1],each=nrofsubs*nrofcondsf2))   
+# create array with control / experimental
+gender   = as.factor(rep(c("men","women"),times=nrofsubs*nrofcondsf1))   
+# create array with measurement values
+score = as.vector( replicate(nrofcondsf1, replicate ( 
+          nrofcondsf2 , rnorm(
+            n = (nrofsubs), 
+            mean = 0 , sd = sample(5,1) ) + sample(8,1)+10
+        ) ) )                             
+# combine arrays into a data.frame
+data.long = data.frame(subj, score, treatment, gender);      
+# delete unnecessary arrays
+rm(list=c("gender","nrofcondsf1","nrofcondsf2","nrofsubs","score","subj","treatment"))
+
+```   
+</details>     
+
+```{r,echo=FALSE}
+kable(data.long[c(1:2,61:62,121:122),], row.names = FALSE, caption = 'data.long') %>%
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = FALSE, position = "left")
+```
+
+Fit mixed-model using ezANOVA() function
+```{r}
+mix.model = ezANOVA(data = data.long      # name of the data frame (long format)
+                    , dv = score          # column name of the dependent variabele
+                    , wid = subj          # column name indicating subject ID
+                    , within = treatment  # column name of the within factor
+                    , between = gender    # column name of the between factor
+                    , return_aov = TRUE   # add information to the output for normality testing
+                    )
+```
+
+Test assumption of normality of the residuals
+```{r, echo=TRUE, eval=FALSE, results='hide'}
+shapiro.test(mix.model$aov$`subj:treatment`$residuals)
+
+hist(mix.model$aov$`subj:treatment`$residuals
+     , xlab = 'Residuals'
+     , main = 'Histogram of residuals')
+```
+```{r, echo=FALSE, eval=TRUE}
+shapiro.test(mix.model$aov$`subj:treatment`$residuals)
+hist(mix.model$aov$`subj:treatment`$residuals, xlab = 'Residuals', main = 'Histogram of residuals')
+```
+
+Test assumption of sphericity
+```{r}
+mix.model$`Mauchly's Test for Sphericity`
+```
+
+If the assumption of sphericity is met use the normal, uncorrected ANOVA output
+```{r}
+mix.model$ANOVA
+```
+
+If the assumption of sphericity is violated, use the corrected ANOVA output
+(The Greenhouse-Geisser correction is more conservative than the Huynd-Feldt correction)
+```{r}
+mix.model$`Sphericity Corrections`
+```
+
+When there are one or more significant main-effects but no significant interaction effect post-hoc comparisons can be made using the pairwise.t.test() function.
+
+Post-hoc comparison for the between-subjects factor:
+```{r}
+pairwise.t.test(
+  x=data.long$score               # column name of the dependent variable
+, g=data.long$gender              # column name of the independent between-subjects variable
+, paired = TRUE                   # for the within factor, set paired=TRUE
+, p.adjust.method = 'bonferroni'  # use bonferroni corrected p-values
+)
+```
+
+Post-hoc comparison for the within-subjects factor:
+```{r}
+pairwise.t.test(
+  x=data.long$score               # column name of the dependent variable
+, g=data.long$treatment           # column name of the independent within-subjects variable
+, paired = TRUE                   # for the within factor, set paired=TRUE
+, p.adjust.method = 'bonferroni'  # use bonferroni corrected p-values
+)
+```
+
+When the interaction-effect turns out significant, pairwise comparisons within each factor are not very informative about what the interaction looks like. Pairwise comparisons between all combinations of conditions is inappropriate when dealing with mixed designs. The best way to interpret an interaction effect is by looking at the interaction pattern in the data using descriptive statistics and visualization.
 
